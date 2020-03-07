@@ -8,6 +8,22 @@ getActiveFilePath = () ->
   document.querySelector('.tree-view .selected')?.getPath?() ||
     atom.workspace.getActivePaneItem()?.buffer?.file?.path
 
+getTargetEditorPath = (e) ->
+  # From copy-path (MIT)
+  tab = e.target.closest(".tab")
+
+  if tab
+    elTitle = tab.querySelector(".title")
+    if elTitle && elTitle.dataset.path
+      return elTitle.dataset.path
+
+  # command palette etc.
+  item = atom.workspace.getActivePaneItem()
+  if !item
+    return "" # no active pane
+
+  return (item.getPath && item.getPath()) || ""
+
 findGitRoot = (dirpath, origpath = dirpath) ->
   if fs.existsSync(path.join(dirpath, '.git'))
     return dirpath
@@ -33,6 +49,7 @@ module.exports =
     e.stopImmediatePropagation()
 
     filepath = @getPath?() || @getModel?().getPath?() || getActiveFilePath()
+    # getTargetEditorPath(e)
 
     try
       isFile = fs.lstatSync(fs.realpathSync(filepath)).isFile()
